@@ -3,7 +3,7 @@ from datetime import datetime
 from html import escape
 from typing import Dict, List
 
-from app.config import REPORTS_DIR
+from app.config import REPORTS_DIR, store_path
 from app.hashing import keccak_bytes
 from app.progress import LABELS, SECTIONS, Status, progress_bps, status_breakdown
 
@@ -102,4 +102,4 @@ def build_report(project, milestones, document, version: int):
     data = html.encode("utf-8")
     path = REPORTS_DIR / f"{project.id}-v{version}.html"
     path.write_bytes(data)
-    return path, keccak_bytes(data), progress_bps([m.status for m in milestones])
+    return store_path(path), keccak_bytes(data), progress_bps([m.status for m in milestones])

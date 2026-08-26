@@ -44,8 +44,40 @@ def _apply_migrations() -> None:
                 conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {tipo}"))
 
 
+def _normalize_stored_paths() -> None:
+    """Convierte rutas absolutas guardadas antes a relativas a STORAGE_DIR.
+
+    Renombrar la carpeta del proyecto rompia los archivos; esto las rescata por
+    nombre y las deja en el formato nuevo.
+    """
+    from pathlib import Path
+
+    from sqlalchemy import inspect, text
+
+    from app.config import STORAGE_DIR
+
+    tablas = {"documents": "stored_path", "evidence_files": "stored_path", "reports": "stored_path"}
+    existing = set(inspect(engine).get_table_names())
+    with engine.begin() as conn:
+        for tabla, columna in tablas.items():
+            if tabla not in existing:
+                continue
+            filas = conn.execute(text(f"SELECT id, {columna} FROM {tabla}")).fetchall()
+            for fila_id, valor in filas:
+                if not valor or not Path(valor).is_absolute():
+                    continue
+                viejo = Path(valor)
+                relativo = f"{viejo.parent.name}/{viejo.name}"
+                if (STORAGE_DIR / relativo).exists():
+                    conn.execute(
+                        text(f"UPDATE {tabla} SET {columna} = :nuevo WHERE id = :id"),
+                        {"nuevo": relativo, "id": fila_id},
+                    )
+
+
 def init_db() -> None:
     from app import models  # noqa: F401  (registra las tablas antes de crearlas)
 
     Base.metadata.create_all(bind=engine)
     _apply_migrations()
+    _normalize_stored_paths()

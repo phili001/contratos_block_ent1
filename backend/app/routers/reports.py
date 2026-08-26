@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.config import resolve_path
 from app.database import get_db
 from app.report import build_report
 from app.routers.projects import get_project
@@ -27,7 +28,7 @@ def generate_report(project_id: str, db: Session = Depends(get_db)):
         version=version,
         progress_bps=bps,
         keccak256=report_hash,
-        stored_path=str(path),
+        stored_path=path,
     )
     db.add(report)
     db.commit()
@@ -45,4 +46,4 @@ def latest_report_html(project_id: str, db: Session = Depends(get_db)):
     project = get_project(project_id, db)
     if not project.reports:
         raise HTTPException(404, "El proyecto no tiene reportes generados")
-    return FileResponse(project.reports[-1].stored_path, media_type="text/html")
+    return FileResponse(resolve_path(project.reports[-1].stored_path), media_type="text/html")

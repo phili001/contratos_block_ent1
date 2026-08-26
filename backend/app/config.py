@@ -30,6 +30,25 @@ for directory in (DOCUMENTS_DIR, REPORTS_DIR, EVIDENCE_DIR):
     directory.mkdir(parents=True, exist_ok=True)
 
 
+def store_path(path: Path) -> str:
+    """Guarda la ruta relativa a STORAGE_DIR.
+
+    Antes se guardaba absoluta y renombrar la carpeta del proyecto rompia todos los
+    archivos. Relativa, la base sobrevive a mover o renombrar el directorio.
+    """
+    return str(Path(path).resolve().relative_to(STORAGE_DIR.resolve()))
+
+
+def resolve_path(stored: str) -> Path:
+    """Convierte lo guardado en una ruta usable, aceptando el formato viejo absoluto."""
+    path = Path(stored)
+    if path.is_absolute():
+        # Registro antiguo: se rescata por el nombre de archivo bajo STORAGE_DIR.
+        candidato = STORAGE_DIR / path.parent.name / path.name
+        return candidato if candidato.exists() else path
+    return STORAGE_DIR / path
+
+
 def load_contracts_env() -> None:
     """Reutiliza contracts/.env para no duplicar credenciales en dos archivos."""
     global RPC_URL, PRIVATE_KEY

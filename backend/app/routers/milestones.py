@@ -5,7 +5,14 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.config import ALLOWED_EVIDENCE_TYPES, EVIDENCE_DIR, MAX_EVIDENCE_BYTES, MAX_EVIDENCE_FILES
+from app.config import (
+    ALLOWED_EVIDENCE_TYPES,
+    EVIDENCE_DIR,
+    MAX_EVIDENCE_BYTES,
+    MAX_EVIDENCE_FILES,
+    resolve_path,
+    store_path,
+)
 from app.database import get_db
 from app.hashing import evidence_bundle_hash, evidence_hash, keccak_bytes
 from app.progress import Status
@@ -139,7 +146,7 @@ async def update_with_evidence(
                 content_type=archivo.content_type,
                 size_bytes=len(data),
                 keccak256=file_hash,
-                stored_path=str(destino),
+                stored_path=store_path(destino),
                 position=position,
             )
         )
@@ -159,7 +166,7 @@ def download_evidence(project_id: str, milestone_id: str, file_id: str, db: Sess
         for archivo in update.files:
             if archivo.id == file_id:
                 return FileResponse(
-                    archivo.stored_path,
+                    resolve_path(archivo.stored_path),
                     media_type=archivo.content_type or "application/octet-stream",
                     filename=archivo.filename,
                 )

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.config import DOCUMENTS_DIR, MAX_UPLOAD_BYTES
+from app.config import DOCUMENTS_DIR, MAX_UPLOAD_BYTES, store_path
 from app.database import get_db
 from app.hashing import keccak_bytes, project_id_hash, sha256_bytes
 from app.progress import progress_bps, status_breakdown
@@ -74,7 +74,7 @@ async def upload_document(project_id: str, file: UploadFile = File(...), db: Ses
         size_bytes=len(data),
         keccak256=keccak_bytes(data),  # este es el que se ancla
         sha256=sha256_bytes(data),
-        stored_path=str(stored),
+        stored_path=store_path(stored),
     )
     db.add(document)
     db.commit()

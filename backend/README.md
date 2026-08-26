@@ -9,8 +9,13 @@ Los PDFs y las notas **nunca** salen de aquí. A la cadena solo suben hashes.
 
 ```bash
 python3 -m venv venv && venv/bin/pip install -r requirements.txt
-venv/bin/uvicorn app.main:app --reload
+venv/bin/python -m uvicorn app.main:app --reload
 ```
+
+> Usa `python -m uvicorn`, no `venv/bin/uvicorn`. Los ejecutables del venv llevan la
+> ruta absoluta grabada en su shebang: si mueves o renombras la carpeta del proyecto,
+> dejan de funcionar con `bad interpreter`. Invocarlos como módulo es inmune a eso.
+> Si ya te pasó, recrea el venv: `rm -rf venv && python3 -m venv venv && venv/bin/pip install -r requirements.txt`
 
 Documentación interactiva en http://127.0.0.1:8000/docs — desde ahí se puede probar
 todo el flujo sin frontend.

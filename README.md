@@ -31,7 +31,7 @@ cd contracts && npm install && npm test
 ```
 
 ```bash
-cd backend && python3 -m venv venv && venv/bin/pip install -r requirements.txt && venv/bin/uvicorn app.main:app --reload
+cd backend && python3 -m venv venv && venv/bin/pip install -r requirements.txt && venv/bin/python -m uvicorn app.main:app --reload
 ```
 
 ```bash

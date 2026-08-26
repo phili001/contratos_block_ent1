@@ -81,9 +81,8 @@ def test_actualizacion_sin_cambios_falla(client):
 
 
 def test_reporte_se_genera_y_su_hash_corresponde_al_archivo(client):
-    from pathlib import Path
-
     from app import models
+    from app.config import resolve_path
     from app.database import SessionLocal
 
     pid = _crear_proyecto(client)["id"]
@@ -97,7 +96,7 @@ def test_reporte_se_genera_y_su_hash_corresponde_al_archivo(client):
 
     db = SessionLocal()
     guardado = db.query(models.Report).filter_by(id=reporte["id"]).one()
-    contenido = Path(guardado.stored_path).read_bytes()
+    contenido = resolve_path(guardado.stored_path).read_bytes()
     db.close()
     # El hash anclado debe ser el del archivo tal como quedo en disco.
     assert reporte["keccak256"] == keccak_bytes(contenido)
@@ -118,3 +117,21 @@ def test_proyecto_inexistente(client):
 
 def test_health(client):
     assert client.get("/health").json() == {"status": "ok"}
+
+
+def test_las_rutas_se_guardan_relativas(client):
+    """Renombrar la carpeta del proyecto no debe romper los archivos guardados."""
+    from app import models
+    from app.config import resolve_path
+    from app.database import SessionLocal
+
+    pid = _crear_proyecto(client)["id"]
+    client.post(f"/projects/{pid}/document", files={"file": ("p.pdf", PDF_FALSO, "application/pdf")})
+
+    db = SessionLocal()
+    doc = db.query(models.Document).filter_by(project_id=pid).one()
+    db.close()
+
+    assert not doc.stored_path.startswith("/"), "la ruta no debe ser absoluta"
+    assert doc.stored_path.startswith("documents/")
+    assert resolve_path(doc.stored_path).exists()
