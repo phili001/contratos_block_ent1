@@ -1,0 +1,37 @@
+{
+  "name": "milestone-registry-contracts",
+  "version": "1.0.0",
+  "description": "Contratos Solidity del sistema de verificacion de hitos en Ethereum",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "test:gas": "REPORT_GAS=true hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "demo": "hardhat run scripts/demo.js",
+    "demo:local": "hardhat run scripts/demo.js --network localhost",
+    "check:sepolia": "hardhat run scripts/preflight.js --network sepolia",
+    "demo:sepolia": "hardhat run scripts/demo.js --network sepolia",
+    "verify:sepolia": "hardhat verify --network sepolia",
+    "wallet:new": "node scripts/new-wallet.js",
+    "balance": "hardhat run scripts/balance.js --network sepolia",
+    "rpc:find": "node scripts/find-rpc.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^17.4.2",
+    "hardhat": "^2.29.1"
+  },
+  "dependencies": {
+    "node": "^26.7.0"
+  }
+}
